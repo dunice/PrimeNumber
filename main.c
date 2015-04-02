@@ -9,46 +9,46 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <omp.h>
+#include <math.h>
 
 int iterator = 0;
 int * primes(int limit) {
     int * list, counter, i, j;
+    double square = sqrt(limit);
 
     list = (int *) malloc(limit * sizeof(int));
+    list[2] = 2;
 
-    #pragma omp parallel for num_threads(4) private(i, j, counter) shared(limit) schedule(dynamic, 1)
-    for(i = 2; i <= limit; ++i) {
+    #pragma omp parallel for num_threads(1) private(i, j, counter) shared(limit, list, square) schedule(guided, 1)
+    for(i = 3; i <= limit; i += 2) {
         counter = 0;
 
-        for(j = 1; j < 10; ++j) {
+        for(j = 1; j < square; ++j) {
             if((i % j) == 0) {
                 ++counter;
             }
+
+            if(counter > 2) {
+                break;
+            }
         }
 
-        #pragma omp critical
-        {
-            if(
-                i < 10 && counter <= 2
-                || i >= 10 && counter < 2
-            ) {
-                list[iterator] = i;
-                ++iterator;
-            }
+        if(counter <= 2) {
+            list[i] = i;
         }
     }
 
     return list;
 }
 
-void output(int * list) {
+void output(int * list, int limit) {
     int i;
 
-    for(i = 0; i < iterator; ++i) {
-        if(i == 0) {
-            printf("%d", list[i]);
-        } else {
-            printf(", %d", list[i]);
+    printf("%d ", list[2]);
+
+    for(i = 3; i < limit; i += 2) {
+        if(list[i]) {
+            printf("%d ", list[i]);
         }
     }
 
@@ -71,23 +71,23 @@ int main(int argc, const char * argv[]) {
 
     switch(type) {
         case 'a':
-            output(list);
+            output(list, limit);
             printf("Tempo de execução: %f segundos", omp_get_wtime() - start);
+            printf("\r\n");
 
             break;
 
         case 't':
             printf("Tempo de execução: %f segundos", omp_get_wtime() - start);
+            printf("\r\n");
 
             break;
 
         case 'l':
-            output(list);
+            output(list, limit);
 
             break;
     }
-
-    printf("\r\n");
 
     return 0;
 }
