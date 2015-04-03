@@ -19,7 +19,7 @@ int * primes(int limit) {
     list = (int *) malloc(limit * sizeof(int));
     list[2] = 2;
 
-    #pragma omp parallel for num_threads(1) private(i, j, counter) shared(limit, list, square) schedule(guided, 1)
+    #pragma omp parallel for num_threads(2) private(i, j, counter) shared(limit, list, square) schedule(dynamic)
     for(i = 3; i <= limit; i += 2) {
         counter = 0;
 
