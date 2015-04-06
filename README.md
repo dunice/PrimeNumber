@@ -5,6 +5,11 @@ PrimeNumbers is program written in C to find prime numbers using parallel progra
 ## Requirements
 - OpenMP
 
+## Compile
+```sh
+$ gcc -fopenmp main.c -o main
+```
+
 ## Usage
 ```sh
 $ ./main
